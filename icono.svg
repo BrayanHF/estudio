@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1f2a"/>
+      <stop offset="1" stop-color="#111318"/>
+    </linearGradient>
+    <linearGradient id="hoja" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6f1e6"/>
+      <stop offset="1" stop-color="#e4dccb"/>
+    </linearGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#fondo)"/>
+  <!-- hojas del libro abierto -->
+  <path d="M500 372 C 430 330, 330 322, 236 342 L 236 676 C 330 656, 430 664, 500 708 Z" fill="url(#hoja)"/>
+  <path d="M524 372 C 594 330, 694 322, 788 342 L 788 676 C 694 656, 594 664, 524 708 Z" fill="url(#hoja)"/>
+  <!-- renglones -->
+  <g stroke="#b9b1a1" stroke-width="16" stroke-linecap="round" fill="none">
+    <path d="M286 420 C 340 410, 400 414, 450 432"/>
+    <path d="M286 480 C 340 470, 400 474, 450 492"/>
+    <path d="M286 540 C 340 530, 400 534, 450 552"/>
+    <path d="M286 600 C 330 591, 370 593, 400 602"/>
+    <path d="M574 480 C 624 462, 684 458, 738 468"/>
+    <path d="M574 540 C 624 522, 684 518, 738 528"/>
+    <path d="M574 600 C 624 582, 684 578, 738 588"/>
+  </g>
+  <!-- cinta verde (el verde del afinador) -->
+  <path d="M640 330 L 640 452 L 668 428 L 696 452 L 696 326 C 676 324, 658 326, 640 330 Z" fill="#7ddf8c"/>
+</svg>

@@ -1,0 +1,10 @@
+# app compilada (se genera con build.sh)
+Afinador.app/
+# certificado de firma: la clave privada nunca se sube
+firma/*
+!firma/cert.cnf
+.DS_Store
+
+Oratoria.app/
+Estudio.app/
+dist/

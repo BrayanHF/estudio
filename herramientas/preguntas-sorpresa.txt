@@ -1,0 +1,42 @@
+# Una pregunta por línea. Las que empiezan con # no se usan. Puedes cambiarlas: la app no reemplaza esta lista.
+# Vida diaria
+¿Madrugar o trasnochar? Defiende una de las dos.
+¿Qué cambiarías de tu ciudad si fueras alcalde por un día?
+¿Cuál es la mejor comida de tu país y por qué?
+¿Qué hábito pequeño te cambió el día a día?
+¿Es mejor vivir en una ciudad grande o en un pueblo? Convénceme.
+¿Qué objeto de tu casa no cambiarías por nada?
+¿Qué harías con un día libre sin celular?
+¿Cuál fue la última vez que aprendiste algo por tu cuenta?
+# Opiniones
+¿Deberían las escuelas enseñar finanzas personales? ¿Por qué?
+¿Las redes sociales nos acercan o nos alejan?
+¿Es mejor ser bueno en muchas cosas o excelente en una sola?
+¿Vale la pena aprender otro idioma hoy, con los traductores automáticos?
+¿Trabajar desde la casa o en una oficina? Defiende una.
+¿Qué profesión crees que va a desaparecer y cuál va a crecer?
+¿Es más importante el talento o la disciplina?
+¿Deberían prohibirse los celulares en los colegios?
+# Ciencia y tecnología
+¿Qué invento cambió más la vida de las personas?
+¿Le confiarías tu salud a una inteligencia artificial?
+¿Para qué sirve explorar el espacio si hay problemas en la Tierra?
+¿Qué te gustaría que la ciencia resolviera en los próximos diez años?
+¿Cómo le explicarías internet a alguien de hace cien años?
+# Historias y recuerdos
+Cuenta una vez que te equivocaste y qué aprendiste.
+¿Cuál es el mejor consejo que te han dado?
+Cuenta un viaje o una salida que recuerdes mucho.
+¿A quién admiras y por qué?
+Cuenta algo que te dio miedo hacer y lo hiciste igual.
+# Imaginar
+Si pudieras cenar con cualquier persona de la historia, ¿con quién y qué le preguntarías?
+Si mañana no tuvieras que trabajar ni estudiar nunca más, ¿qué harías?
+Inventa un producto nuevo y véndemelo en un minuto.
+¿Qué superpoder elegirías y para qué lo usarías?
+Si pudieras aprender una habilidad en un día, ¿cuál sería?
+# Deportes, juegos y cultura
+¿Cuál es el mejor juego, libro o película que has disfrutado y por qué?
+¿Los videojuegos pueden enseñar algo importante?
+¿Qué deporte le recomendarías a alguien que nunca ha hecho ejercicio?
+¿Qué canción le pondrías a alguien para que conozca tu cultura?

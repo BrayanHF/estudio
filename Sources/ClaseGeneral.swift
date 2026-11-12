@@ -9,7 +9,7 @@ extension Sesion {
     func usar(_ materia: URL) -> Bool {
         if Carpeta.raiz.standardizedFileURL == materia.standardizedFileURL { return true }
         guard trabajando == nil else {
-            aviso = "Claude todavía está trabajando en la otra materia. Espera a que termine para cambiar."
+            aviso = L("Claude todavía está trabajando en la otra materia. Espera a que termine para cambiar.")
             return false
         }
         grabador.detener()

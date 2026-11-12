@@ -49,7 +49,7 @@ final class Grabador: ObservableObject {
         detener()
         AVCaptureDevice.requestAccess(for: .audio) { ok in
             DispatchQueue.main.async {
-                guard ok else { self.error = "Sin permiso de micrófono. Actívalo en Ajustes → Privacidad → Micrófono."; return }
+                guard ok else { self.error = L("Sin permiso de micrófono. Actívalo en Ajustes → Privacidad → Micrófono."); return }
                 self.empezar(nombre, fecha: fecha)
             }
         }
@@ -62,10 +62,10 @@ final class Grabador: ObservableObject {
                                       AVLinearPCMBitDepthKey: 16, AVLinearPCMIsFloatKey: false, AVLinearPCMIsBigEndianKey: false]
         do {
             archivo = try AVAudioFile(forWriting: destino, settings: ajustes, commonFormat: .pcmFormatFloat32, interleaved: false)
-        } catch { self.error = "No pude crear el archivo: \(error.localizedDescription)"; return }
+        } catch { self.error = L("No pude crear el archivo: \(error.localizedDescription)"); return }
         factor = Float(pow(10, ganancia / 20))
         microfono = Microfono.elegido()
-        guard conectar() else { self.error = "No pude usar el micrófono."; archivo = nil; return }
+        guard conectar() else { self.error = L("No pude usar el micrófono."); archivo = nil; return }
         // al conectar audífonos Bluetooth macOS para el motor aunque el micrófono sea el mismo: se reconecta y la toma
         // sigue. Si de verdad cambió el micrófono (desconectaste el fifine), la grabación se para y se avisa.
         cambio = NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChange, object: engine, queue: .main) { [weak self] _ in
@@ -97,14 +97,14 @@ final class Grabador: ObservableObject {
         guard grabando != nil, !engine.isRunning || Microfono.elegido() != microfono else { return }
         guard Microfono.elegido() == microfono else {
             detener()
-            error = "La grabación se cortó porque cambió el micrófono. Vuelve a grabarla."
+            error = L("La grabación se cortó porque cambió el micrófono. Vuelve a grabarla.")
             return
         }
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         if !conectar() {
             detener()
-            error = "La grabación se cortó porque el micrófono dejó de responder. Vuelve a grabarla."
+            error = L("La grabación se cortó porque el micrófono dejó de responder. Vuelve a grabarla.")
         }
     }
 

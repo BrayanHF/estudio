@@ -280,19 +280,19 @@ struct ResumenEjercicio {
     let graves: Double?, agudos: Double?
     var consejos: [String] {
         var c: [String] = []
-        if abs(desvio) >= 10 { c.append(desvio < 0 ? "Tiendes a cantar bajo (\(Int(desvio)) cents)" : "Tiendes a cantar alto (+\(Int(desvio)) cents)") }
+        if abs(desvio) >= 10 { c.append(desvio < 0 ? L("Tiendes a cantar bajo (\(Int(desvio)) cents)") : L("Tiendes a cantar alto (+\(Int(desvio)) cents)")) }
         if let g = graves, let a = agudos, abs(a - g) >= 15 {
-            c.append(a < g ? "En las notas agudas te quedas más bajo" : "En las notas agudas te pasas hacia arriba")
+            c.append(a < g ? L("En las notas agudas te quedas más bajo") : L("En las notas agudas te pasas hacia arriba"))
         }
-        if temblor >= 30 { c.append("La nota tiembla: intenta sostenerla más firme") }
-        if let l = llegada, l >= 0.25 { c.append("Tardas en llegar a la nota (\(Int(l * 1000)) ms)") }
-        return c.isEmpty ? ["¡Bien centrado y estable!"] : c
+        if temblor >= 30 { c.append(L("La nota tiembla: intenta sostenerla más firme")) }
+        if let l = llegada, l >= 0.25 { c.append(L("Tardas en llegar a la nota (\(Int(l * 1000)) ms)")) }
+        return c.isEmpty ? [L("¡Bien centrado y estable!")] : c
     }
 }
 
 /// Cada rutina es una carpeta dentro de Resources con su audio.m4a y su notas.json.
 struct Rutina: Identifiable, Hashable { let id: String; let nombre: String }
-let RUTINAS = [Rutina(id: "basico", nombre: "Básico"), Rutina(id: "intermedio", nombre: "Intermedio")]
+let RUTINAS = [Rutina(id: "basico", nombre: L("Básico")), Rutina(id: "intermedio", nombre: L("Intermedio"))]
 
 final class Practica: ObservableObject {
     @Published private(set) var datos = Datos(ejercicios: [], notas: [])
@@ -425,7 +425,7 @@ final class Practica: ObservableObject {
             let medio = r.map(\.m).sorted()[r.count / 2]
             let g = r.filter { $0.m < medio }.map(\.desvio), a = r.filter { $0.m > medio }.map(\.desvio)
             let ll = r.compactMap(\.llegada)
-            return ResumenEjercicio(nombre: "\(i + 1). \(datos.ejercicios[i].name)", notas: r.count, pct: pct,
+            return ResumenEjercicio(nombre: "\(i + 1). \(traducir(datos.ejercicios[i].name))", notas: r.count, pct: pct,
                                     desvio: media(r.map(\.desvio)), temblor: media(r.map(\.temblor)),
                                     llegada: ll.isEmpty ? nil : media(ll),
                                     graves: g.count >= 3 ? media(g) : nil, agudos: a.count >= 3 ? media(a) : nil)
@@ -551,17 +551,17 @@ final class Practica: ObservableObject {
     var nombreCantado: String {
         guard let s = cantado else { return "–" }
         let r = Int(s.rounded())
-        if let o = objetivo, ((r - o.m) % 12 + 12) % 12 == 0 { return o.n }
-        return SOLF[((r % 12) + 12) % 12]
+        if let o = objetivo, ((r - o.m) % 12 + 12) % 12 == 0 { return nota(o.n) }
+        return nota(SOLF[((r % 12) + 12) % 12])
     }
 
     var consejo: String {
-        if !micActivo { return "Activa el micrófono para empezar" }
-        guard let o = objetivoEval else { return sonando ? "Espera la siguiente nota" : "Dale play y canta con el piano" }
-        guard cantado != nil, let ok else { return "Canta: \(o.n)" }
-        if ok { return "¡Afinado!" }
-        if cents < 0 { return cents < -150 ? "Sube bastante ↑" : "Sube un poco ↑" }
-        return cents > 150 ? "Baja bastante ↓" : "Baja un poco ↓"
+        if !micActivo { return L("Activa el micrófono para empezar") }
+        guard let o = objetivoEval else { return sonando ? L("Espera la siguiente nota") : L("Dale play y canta con el piano") }
+        guard cantado != nil, let ok else { return L("Canta: \(nota(o.n))") }
+        if ok { return L("¡Afinado!") }
+        if cents < 0 { return cents < -150 ? L("Sube bastante ↑") : L("Sube un poco ↑") }
+        return cents > 150 ? L("Baja bastante ↓") : L("Baja un poco ↓")
     }
 }
 
@@ -615,7 +615,7 @@ struct Grafica: View {
             let visibles = p.datos.notas.filter { $0.e >= t - pasado && $0.t <= t + futuro }
             let barras = visibles.map { n -> (Nota, CGRect, CGFloat) in
                 let r = CGRect(x: X(n.t), y: Y(Double(n.m)) - alto / 2, width: max(4, X(n.e) - X(n.t) - 3), height: alto)
-                let ancho = ctx.resolve(Text(n.n).font(.system(size: fuente, weight: .bold))).measure(in: CGSize(width: 400, height: 100)).width
+                let ancho = ctx.resolve(Text(nota(n.n)).font(.system(size: fuente, weight: .bold))).measure(in: CGSize(width: 400, height: 100)).width
                 return (n, r, ancho)
             }
             let todasDentro = barras.allSatisfy { $0.2 + 16 * e <= $0.1.width }
@@ -624,10 +624,10 @@ struct Grafica: View {
                 let activa = t >= n.t && t < n.e
                 ctx.fill(Path(roundedRect: r, cornerRadius: min(alto, r.width) / 2), with: .color(Color.crema.opacity(activa ? 1 : 0.5)))
                 if todasDentro {
-                    ctx.draw(Text(n.n).font(.system(size: fuente, weight: .bold)).foregroundStyle(Color.fondo),
+                    ctx.draw(Text(nota(n.n)).font(.system(size: fuente, weight: .bold)).foregroundStyle(Color.fondo),
                              at: CGPoint(x: r.minX + 8 * e, y: r.midY), anchor: .leading)
                 } else if todasEncima {
-                    ctx.draw(Text(n.n).font(.system(size: fuente, weight: .bold)).foregroundStyle(Color.crema.opacity(activa ? 1 : 0.75)),
+                    ctx.draw(Text(nota(n.n)).font(.system(size: fuente, weight: .bold)).foregroundStyle(Color.crema.opacity(activa ? 1 : 0.75)),
                              at: CGPoint(x: r.midX, y: r.minY - 3), anchor: .bottom)
                 }
             }
@@ -651,7 +651,7 @@ struct Grafica: View {
                      with: .linearGradient(Gradient(colors: [Color.fondo.opacity(0.45), Color.fondo.opacity(0)]),
                                            startPoint: CGPoint(x: franja * 0.6, y: 0), endPoint: CGPoint(x: franja, y: 0)))
             for (m, y) in rotulos {
-                ctx.draw(Text("\(SOLF[m % 12])\(m / 12 - 1)").font(.system(size: 12 * e, weight: .medium)).foregroundStyle(Color.suave.opacity(0.85)),
+                ctx.draw(Text(verbatim: "\(nota(SOLF[m % 12]))\(m / 12 - 1)").font(.system(size: 12 * e, weight: .medium)).foregroundStyle(Color.suave.opacity(0.85)),
                          at: CGPoint(x: 16, y: y), anchor: .leading)
             }
         }
@@ -775,7 +775,7 @@ struct Contenido: View {
                 ForEach(Array(p.datos.ejercicios.enumerated()), id: \.offset) { i, ex in
                     Button { p.irAEjercicio(i) } label: {
                         HStack(spacing: 8) {
-                            Text("\(i + 1). \(ex.name)")
+                            Text(verbatim: "\(i + 1). \(traducir(ex.name))")
                             if let pc = p.porcentaje(i) {
                                 Text("\(pc)% afinado").foregroundStyle(Color.crema).fontWeight(.bold).monospacedDigit()
                             }
@@ -805,7 +805,7 @@ struct Contenido: View {
 
     private var notas: some View {
         HStack(spacing: z(28)) {
-            etiqueta("PIANO", p.objetivo?.n ?? "–", .crema)
+            etiqueta("PIANO", p.objetivo.map { nota($0.n) } ?? "–", .crema)
             etiqueta("TÚ", p.nombreCantado, p.ok == nil ? .white : (p.ok! ? .afinado : .desafinado))
         }
     }
@@ -816,7 +816,7 @@ struct Contenido: View {
 
     private func etiqueta(_ titulo: String, _ valor: String, _ color: Color) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(titulo).font(.system(size: z(11), weight: .semibold)).kerning(1.2).foregroundStyle(.secondary)
+            Text(traducir(titulo)).font(.system(size: z(11), weight: .semibold)).kerning(1.2).foregroundStyle(.secondary)
             Text(valor).font(.system(size: z(30), weight: .bold, design: .rounded)).foregroundStyle(color).frame(minWidth: z(80), alignment: .leading)
         }
     }
@@ -942,7 +942,7 @@ struct Contenido: View {
 
     private func dato(_ titulo: String, _ valor: String) -> some View {
         VStack(alignment: .leading, spacing: z(2)) {
-            Text(titulo.uppercased()).font(.system(size: z(10), weight: .semibold)).kerning(1).foregroundStyle(.secondary)
+            Text(traducir(titulo).uppercased()).font(.system(size: z(10), weight: .semibold)).kerning(1).foregroundStyle(.secondary)
             Text(valor).font(.system(size: z(14), weight: .semibold)).monospacedDigit()
         }
     }

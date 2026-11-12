@@ -82,7 +82,7 @@ extension Sesion {
         """
         trabajar("Claude está armando el plan de \(nombreMateria)…") {
             let r = await Herramientas.preguntarAClaude(pedido, web: true) { self.registro.append($0) }
-            self.registro.append(r.ok ? r.respuesta : "Algo falló: \(r.respuesta)")
+            self.registro.append(r.ok ? r.respuesta : L("Algo falló: \(r.respuesta)"))
             self.recargar()
         }
     }
@@ -100,7 +100,7 @@ extension Sesion {
         """
         trabajar("Claude está cambiando el plan…") {
             let r = await Herramientas.preguntarAClaude(pedido) { self.registro.append($0) }
-            self.registro.append(r.ok ? r.respuesta : "Algo falló: \(r.respuesta)")
+            self.registro.append(r.ok ? r.respuesta : L("Algo falló: \(r.respuesta)"))
         }
     }
 }
@@ -138,7 +138,7 @@ struct FormNuevaMateria: View {
                         .font(.system(size: 14 * z, weight: .semibold)).padding(.horizontal, 14 * z).padding(.vertical, 6 * z)
                 }.buttonStyle(.glass)
                 Spacer()
-                if !f.material.isEmpty { Text("\(f.material.count) archivo\(f.material.count == 1 ? "" : "s")").font(.system(size: 13 * z)).foregroundStyle(.secondary) }
+                if !f.material.isEmpty { Text(f.material.count == 1 ? L("1 archivo") : L("\(f.material.count) archivos")).font(.system(size: 13 * z)).foregroundStyle(.secondary) }
             }
             ForEach(f.material, id: \.self) { Text("• " + $0.lastPathComponent).font(.system(size: 13 * z)).foregroundStyle(.secondary) }
             HStack {
@@ -175,9 +175,9 @@ struct FormNuevaMateria: View {
     }
 
     private func crear() {
-        guard s.trabajando == nil else { f.error = "Claude todavía está trabajando en otra materia. Espera a que termine."; return }
+        guard s.trabajando == nil else { f.error = L("Claude todavía está trabajando en otra materia. Espera a que termine."); return }
         guard let u = m.crear(nombre: f.nombre, descripcion: f.descripcion, material: f.material, ajustes: f.ajustes) else {
-            f.error = "No pude crearla: ¿ya hay una materia con ese nombre?"; return
+            f.error = L("No pude crearla: ¿ya hay una materia con ese nombre?"); return
         }
         cerrar()
         if s.usar(u) { s.armarPlan() }

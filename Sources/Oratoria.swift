@@ -82,7 +82,7 @@ final class Sesion: ObservableObject {
         if Carpeta.raiz.standardizedFileURL == Materias.raiz.standardizedFileURL {
             clase = nil; estado = EstadoClase(); pendiente = .crear(numero: 1, anterior: nil); aviso = nil; return
         }
-        guard Carpeta.existe else { aviso = "No encuentro la carpeta \(Carpeta.raiz.path)."; return }
+        guard Carpeta.existe else { aviso = L("No encuentro la carpeta \(Carpeta.raiz.path)."); return }
         pendiente = Pendiente.buscar()
         if case .clase(let url) = pendiente, let c = Clase.leer(url) {
             clase = c
@@ -228,7 +228,7 @@ final class Sesion: ObservableObject {
         // las demás materias usan el pedido general (ClaseGeneral.swift); Oratoria sigue con el suyo
         if !Carpeta.esOratoria {
             guard FileManager.default.fileExists(atPath: Carpeta.raiz.appendingPathComponent("plan/PLAN.md").path) else {
-                aviso = "Esta materia todavía no tiene plan (plan/PLAN.md). Se arma desde su detalle."
+                aviso = L("Esta materia todavía no tiene plan (plan/PLAN.md). Se arma desde su detalle.")
                 return
             }
             let hoy = Carpeta.hoy()
@@ -236,7 +236,7 @@ final class Sesion: ObservableObject {
             let pedido = pedidoDeClaseGeneral(numero: n, anterior: anterior, nombre: nombre, hoy: hoy)
             trabajar("Creando la clase \(n) con Claude…") {
                 let r = await Herramientas.preguntarAClaude(pedido, candado: Herramientas.candadoCrear) { self.registro.append($0) }
-                self.registro.append(r.ok ? "Listo: \(r.respuesta)" : "Algo falló: \(r.respuesta)")
+                self.registro.append(r.ok ? L("Listo: \(r.respuesta)") : L("Algo falló: \(r.respuesta)"))
                 self.recargar()
             }
             return
@@ -309,7 +309,7 @@ final class Sesion: ObservableObject {
         """
         trabajar("Creando la clase \(n) con Claude…") {
             let r = await Herramientas.preguntarAClaude(pedido, candado: Herramientas.candadoCrear) { self.registro.append($0) }
-            self.registro.append(r.ok ? "Listo: \(r.respuesta)" : "Algo falló: \(r.respuesta)")
+            self.registro.append(r.ok ? L("Listo: \(r.respuesta)") : L("Algo falló: \(r.respuesta)"))
             self.recargar()
             if self.calentoMientrasSeCreaba, self.clase != nil { self.estado.calentado = true; self.guardar() }
             self.calentoMientrasSeCreaba = false
@@ -386,7 +386,7 @@ final class Sesion: ObservableObject {
                     self.estado.evaluada = true
                     self.guardar()
                 } else {
-                    self.registro.append("La evaluación anterior terminó sin dejar grabaciones/\(fecha)/resumen-del-dia.md. Puedes evaluar de nuevo.")
+                    self.registro.append(L("La evaluación anterior terminó sin dejar grabaciones/\(fecha)/resumen-del-dia.md. Puedes evaluar de nuevo."))
                 }
             }
             return
@@ -395,26 +395,26 @@ final class Sesion: ObservableObject {
             let wavs = ((try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)) ?? [])
                 .filter { $0.pathExtension == "wav" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
             if wavs.isEmpty {
-                self.registro.append("No hay grabaciones en grabaciones/\(fecha)/: Claude evaluará solo tus respuestas.")
+                self.registro.append(L("No hay grabaciones en grabaciones/\(fecha)/: Claude evaluará solo tus respuestas."))
             } else {
                 // la voz se analiza al mismo tiempo que se terminan las transcripciones
-                self.registro.append("1/3 · Analizando la voz de \(wavs.count) grabaciones…")
+                self.registro.append(L("1/3 · Analizando la voz de \(wavs.count) grabaciones…"))
                 async let analisis = Herramientas.correr(Herramientas.python, [Herramientas.script("analizar_voz.py")] + wavs.map(\.path)) { self.registro.append($0) }
                 // casi todas se transcribieron al grabarlas; se espera la que vaya en curso y se hacen las que falten, todas de una
-                if self.transcriptor.ocupado { self.registro.append("2/3 · Terminando las transcripciones que van en curso…") }
+                if self.transcriptor.ocupado { self.registro.append(L("2/3 · Terminando las transcripciones que van en curso…")) }
                 await self.transcriptor.esperar()
                 let faltan = wavs.filter { Transcriptor.necesita($0) && !FileManager.default.fileExists(atPath: Transcriptor.txt($0).path) }
                 if !faltan.isEmpty {
-                    self.registro.append("2/3 · Transcribiendo \(faltan.count) grabaciones (tarda unos minutos)…")
+                    self.registro.append(L("2/3 · Transcribiendo \(faltan.count) grabaciones (tarda unos minutos)…"))
                     _ = await Herramientas.correr(Herramientas.python, [Herramientas.script("transcribir.py")] + faltan.map(\.path)) { self.registro.append($0) }
                 } else {
-                    self.registro.append("2/3 · Las transcripciones ya estaban listas.")
+                    self.registro.append(L("2/3 · Las transcripciones ya estaban listas."))
                 }
                 let a = await analisis
                 try? a.salida.write(to: dir.appendingPathComponent("analisis-voz.txt"), atomically: true, encoding: .utf8)
             }
             self.escribirRespuestas(c, en: dir)
-            self.registro.append("3/3 · Claude está revisando la clase…")
+            self.registro.append(L("3/3 · Claude está revisando la clase…"))
             let pedido = self.pedidoDeEvaluacion(c, fecha: fecha, dir: dir)
             let r = await Herramientas.preguntarAClaude(pedido, candado: Herramientas.candadoEvaluar) { self.registro.append($0) }
             if r.ok && !r.respuesta.isEmpty {
@@ -423,7 +423,7 @@ final class Sesion: ObservableObject {
                 self.guardar()
                 Velocidad.actualizar(siempre: true)
             } else {
-                self.registro.append("Algo falló al evaluar: \(r.respuesta)")
+                self.registro.append(L("Algo falló al evaluar: \(r.respuesta)"))
             }
         }
     }
@@ -529,8 +529,8 @@ final class Sesion: ObservableObject {
         try? md.write(to: dir.appendingPathComponent("respuestas.md"), atomically: true, encoding: .utf8)
     }
 
-    func trabajar(_ titulo: String, _ tarea: @escaping @MainActor () async -> Void) {
-        trabajando = titulo; registro = []
+    func trabajar(_ titulo: String.LocalizationValue, _ tarea: @escaping @MainActor () async -> Void) {
+        trabajando = String(localized: titulo); registro = []
         Task { @MainActor in
             await tarea()
             self.trabajando = nil
@@ -619,7 +619,7 @@ indirect enum Bloque {
                 out.append(.codigo(cod.joined(separator: "\n"), linea: base + i)); i += 1; continue
             }
             if t.hasPrefix("<details") {
-                let inicio = i; var resumen = "Ver"; var hijos: [String] = []; i += 1
+                let inicio = i; var resumen = L("Ver"); var hijos: [String] = []; i += 1
                 while i < lineas.count && !lineas[i].contains("</details>") {
                     if let m = lineas[i].firstMatch(of: /<summary>(.*)<\/summary>/) { resumen = String(m.1) } else { hijos.append(lineas[i]) }
                     i += 1
@@ -864,11 +864,11 @@ struct TextoResaltable: NSViewRepresentable {
             }
             punto.x += 14; punto.y -= 6
             let boton = NSButton(image: NSImage(systemSymbolName: quitar ? "eraser" : "highlighter",
-                                                accessibilityDescription: quitar ? "Quitar resaltado" : "Resaltar")!,
+                                                accessibilityDescription: quitar ? L("Quitar resaltado") : L("Resaltar"))!,
                                  target: self, action: #selector(alternar(_:)))
             boton.isBordered = false
             boton.contentTintColor = quitar ? .secondaryLabelColor : .systemYellow
-            boton.toolTip = quitar ? "Quitar el resaltado" : "Resaltar"
+            boton.toolTip = quitar ? L("Quitar el resaltado") : L("Resaltar")
             boton.frame = NSRect(x: 0, y: 0, width: 34, height: 28)
             let vc = NSViewController(); vc.view = NSView(frame: boton.frame); vc.view.addSubview(boton)
             let p = NSPopover(); p.contentViewController = vc; p.behavior = .transient; p.animates = false
@@ -989,7 +989,7 @@ struct VistaBloques: View {
         case .campo(let n, let m, let l):
             HStack(alignment: .center, spacing: 8 * z) {
                 Text(m).font(.system(size: 15 * z, weight: .semibold)).foregroundStyle(.secondary).frame(minWidth: 18 * z, alignment: .trailing)
-                if let nombre = respuesta(l) { FilaGrabacion(nombre: nombre, s: s, g: s.grabador, z: z, titulo: "Respuesta \(m.dropLast())") }
+                if let nombre = respuesta(l) { FilaGrabacion(nombre: nombre, s: s, g: s.grabador, z: z, titulo: L("Respuesta \(String(m.dropLast()))")) }
             }.padding(.leading, CGFloat(n) * 22 * z)
         case .cita(let n, let t, let l):
             conGrabacion(t, conHueco(t, linea: l, HStack(spacing: 10 * z) {
@@ -1067,7 +1067,7 @@ struct Desplegable<Contenido: View>: View {
                 HStack(spacing: 10 * z) {
                     Image(systemName: "chevron.right").font(.system(size: 12 * z, weight: .semibold))
                         .rotationEffect(.degrees(abierto ? 90 : 0)).foregroundStyle(.secondary)
-                    Text((try? AttributedString(markdown: resumen)) ?? AttributedString(resumen))
+                    Text((try? AttributedString(markdown: traducir(resumen))) ?? AttributedString(traducir(resumen)))
                         .font(.system(size: 15 * z, weight: .semibold))
                     Spacer(minLength: 0)
                 }
@@ -1128,7 +1128,7 @@ struct FilaGrabacion: View {
                 }.buttonStyle(.glass).buttonBorderShape(.circle).help("Escuchar")
             }
             VStack(alignment: .leading, spacing: 2 * z) {
-                if let titulo { Text(titulo).font(.system(size: 14 * z, weight: .semibold)) }
+                if let titulo { Text(traducir(titulo)).font(.system(size: 14 * z, weight: .semibold)) }
                 Text("\(fecha)_\(nombre).wav").font(.system(size: (titulo == nil ? 13 : 11) * z, weight: titulo == nil ? .semibold : .regular, design: .monospaced))
                     .foregroundStyle(titulo == nil ? Color.primary : Color.secondary)
                 if grabandoEste {
@@ -1138,7 +1138,7 @@ struct FilaGrabacion: View {
                             .overlay(alignment: .leading) { Capsule().fill(g.nivel > 0.9 ? Color.desafinado : Color.afinado).frame(width: 120 * z * CGFloat(min(1, g.nivel)), height: 5 * z) }
                     }.font(.system(size: 12 * z)).foregroundStyle(Color.red)
                 } else if hay, let d = g.duracion(nombre, fecha: fecha) {
-                    Text(String(format: "Grabada · %d:%02d", Int(d) / 60, Int(d) % 60)).font(.system(size: 12 * z)).foregroundStyle(Color.afinado)
+                    Text(String(format: traducir("Grabada · %d:%02d"), Int(d) / 60, Int(d) % 60)).font(.system(size: 12 * z)).foregroundStyle(Color.afinado)
                     barraDeTiempo(d, fecha: fecha)
                 } else {
                     Text("Sin grabar").font(.system(size: 12 * z)).foregroundStyle(.secondary)
@@ -1199,10 +1199,10 @@ struct VistaInicio: View {
                         if let o = objetivo { TextoMD(texto: o.replacingOccurrences(of: "> ", with: ""), z: z, tam: 14).foregroundStyle(Color.suave) }
                         HStack(spacing: 10 * z) {
                             if Carpeta.conCalentamiento { etiqueta(s.estado.calentado ? "Calentamiento hecho" : "Falta calentar", s.estado.calentado) }
-                            etiqueta("Paso \(s.estado.paso + 1) de \(c.pasos.count)", s.estado.paso > 0)
+                            etiqueta(L("Paso \(s.estado.paso + 1) de \(c.pasos.count)"), s.estado.paso > 0)
                             if !s.grabacionesPedidas.isEmpty {
                                 let hechas = s.grabacionesPedidas.filter { s.grabador.existe($0, fecha: s.estado.fecha) }.count
-                                etiqueta("\(hechas)/\(s.grabacionesPedidas.count) grabaciones", hechas == s.grabacionesPedidas.count)
+                                etiqueta(L("\(hechas)/\(s.grabacionesPedidas.count) grabaciones"), hechas == s.grabacionesPedidas.count)
                             }
                         }
                         HStack(spacing: 12 * z) {
@@ -1263,13 +1263,15 @@ struct VistaInicio: View {
     }
 
     private func etiqueta(_ t: String, _ ok: Bool) -> some View {
-        Label(t, systemImage: ok ? "checkmark.circle.fill" : "circle").font(.system(size: 12 * z, weight: .medium))
+        Label(traducir(t), systemImage: ok ? "checkmark.circle.fill" : "circle").font(.system(size: 12 * z, weight: .medium))
             .foregroundStyle(ok ? Color.afinado : Color.suave)
             .padding(.horizontal, 10 * z).padding(.vertical, 5 * z).background(Color.white.opacity(0.06), in: Capsule())
     }
 
     private func fechaLarga() -> String {
-        let f = DateFormatter(); f.locale = Locale(identifier: "es_CO"); f.dateFormat = "EEEE d 'de' MMMM"
+        let f = DateFormatter()
+        if appEnIngles { f.locale = Locale(identifier: "en_US"); f.setLocalizedDateFormatFromTemplate("EEEEMMMMd") }
+        else { f.locale = Locale(identifier: "es_CO"); f.dateFormat = "EEEE d 'de' MMMM" }
         let t = f.string(from: Date())
         return t.prefix(1).uppercased() + t.dropFirst()
     }
@@ -1517,7 +1519,7 @@ struct VistaEvaluar: View {
 
                 VStack(alignment: .leading, spacing: 8 * z) {
                     Text("TU AUTOEVALUACIÓN").font(.system(size: 11 * z, weight: .semibold)).kerning(1.2).foregroundStyle(.secondary)
-                    Text("Antes de que Claude opine, dilo en voz alta: ¿qué crees que salió bien y qué salió mal?" + (Carpeta.esOratoria ? " Si contaste tus muletillas, dilo también." : ""))
+                    Text(L("Antes de que Claude opine, dilo en voz alta: ¿qué crees que salió bien y qué salió mal?") + (Carpeta.esOratoria ? " " + L("Si contaste tus muletillas, dilo también.") : ""))
                         .font(.system(size: 14 * z)).foregroundStyle(Color.suave)
                     FilaGrabacion(nombre: "autoevaluacion", s: s, g: s.grabador, z: z, titulo: "Tu autoevaluación")
                 }.tarjeta(z)
@@ -1639,7 +1641,7 @@ struct MenuGanancia: View {
     var body: some View {
         Picker("Subir el volumen al grabar", selection: $g.ganancia) {
             ForEach(Grabador.ganancias, id: \.self) { d in
-                Text(d == 0 ? "Sin subir (0 dB)" : "+\(Int(d)) dB" + (d == 12 ? " (recomendado)" : "")).tag(d)
+                Text(d == 0 ? L("Sin subir (0 dB)") : "+\(Int(d)) dB" + (d == 12 ? " " + L("(recomendado)") : "")).tag(d)
             }
         }
         .pickerStyle(.inline)

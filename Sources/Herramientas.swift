@@ -80,7 +80,7 @@ enum Herramientas {
                 lock.lock(); todo += String(data: resto, encoding: .utf8) ?? ""; let final = todo; lock.unlock()
                 cont.resume(returning: (pr.terminationStatus, final))
             }
-            do { try p.run(); alEmpezar(p.processIdentifier) } catch { cont.resume(returning: (-1, "No pude ejecutar \(programa): \(error.localizedDescription)")) }
+            do { try p.run(); alEmpezar(p.processIdentifier) } catch { cont.resume(returning: (-1, L("No pude ejecutar \(programa): \(error.localizedDescription)"))) }
         }
     }
 
@@ -111,7 +111,7 @@ enum Herramientas {
     /// `web`: también puede buscar y leer páginas en internet (para investigar las fuentes al armar el plan de una materia).
     static func preguntarAClaude(_ pedido: String, candado: URL? = nil, web: Bool = false,
                                  linea: @escaping (String) -> Void = { _ in }) async -> (ok: Bool, respuesta: String) {
-        guard let claude else { return (false, "No encontré Claude Code instalado en este Mac.") }
+        guard let claude else { return (false, L("No encontré Claude Code instalado en este Mac.")) }
         // fijo para crear clases y para evaluarlas: Opus 5.5 con esfuerzo medio, sin Bash ni PDF
         let herramientas = "Read,Write,Edit,Glob,Grep" + (web ? ",WebSearch,WebFetch" : "")
         let r = await correr(claude, ["-p", pedido, "--model", "claude-opus-5-5", "--effort", "medium", "--permission-mode", "acceptEdits",
@@ -124,7 +124,7 @@ enum Herramientas {
         if let candado { try? FileManager.default.removeItem(at: candado) }
         let salida = r.salida.trimmingCharacters(in: .whitespacesAndNewlines)
         if salida.contains("Failed to authenticate") || salida.lowercased().contains("please run /login") || salida.contains("Invalid API key") {
-            return (false, "Claude Code no tiene la sesión iniciada. Abre la Terminal, escribe claude, inicia sesión con /login y vuelve a intentarlo.")
+            return (false, L("Claude Code no tiene la sesión iniciada. Abre la Terminal, escribe claude, inicia sesión con /login y vuelve a intentarlo."))
         }
         return (r.codigo == 0, salida)
     }

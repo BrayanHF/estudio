@@ -117,7 +117,7 @@ struct VistaPerfil: View {
     }
 
     private func etiqueta(_ t: String) -> some View {
-        Text(t).font(.system(size: 14 * z, weight: .semibold)).padding(.top, 2 * z)
+        Text(traducir(t)).font(.system(size: 14 * z, weight: .semibold)).padding(.top, 2 * z)
     }
 
     private func cuadro(_ texto: Binding<String>) -> some View {
@@ -132,7 +132,7 @@ struct VistaPerfil: View {
         let p = NSOpenPanel()
         p.canChooseDirectories = true; p.canChooseFiles = false; p.canCreateDirectories = true
         p.directoryURL = URL(fileURLWithPath: f.p.carpeta).deletingLastPathComponent()
-        p.prompt = "Usar esta carpeta"
+        p.prompt = L("Usar esta carpeta")
         if p.runModal() == .OK, let u = p.url { f.p.carpeta = u.path }
     }
 

@@ -47,13 +47,13 @@ final class Requisitos: ObservableObject {
 
     @MainActor private func correr(_ titulo: String, _ programa: String, _ args: [String]) {
         guard instalando == nil else { return }
-        instalando = titulo; registro = []
+        instalando = traducir(titulo); registro = []
         Task { @MainActor in
             let r = await Herramientas.correr(programa, args) { [weak self] l in
                 self?.registro.append(l)
                 if (self?.registro.count ?? 0) > 200 { self?.registro.removeFirst() }
             }
-            if r.codigo != 0 { self.registro.append("Algo falló (código \(r.codigo)). Revisa tu conexión y vuelve a intentarlo.") }
+            if r.codigo != 0 { self.registro.append(L("Algo falló (código \(r.codigo)). Revisa tu conexión y vuelve a intentarlo.")) }
             self.instalando = nil
             await self.revisar()
         }
@@ -99,8 +99,8 @@ struct TarjetaRequisitos: View {
             Image(systemName: ok ? "checkmark.circle.fill" : "circle").font(.system(size: 18 * z))
                 .foregroundStyle(ok ? Color.afinado : Color.secondary)
             VStack(alignment: .leading, spacing: 2 * z) {
-                Text(titulo).font(.system(size: 15 * z, weight: .semibold))
-                Text(detalle).font(.system(size: 13 * z)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                Text(traducir(titulo)).font(.system(size: 15 * z, weight: .semibold))
+                Text(traducir(detalle)).font(.system(size: 13 * z)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
             boton()

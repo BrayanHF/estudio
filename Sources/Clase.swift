@@ -133,7 +133,7 @@ struct Clase {
     static func leer(_ url: URL) -> Clase? {
         guard let texto = try? String(contentsOf: url, encoding: .utf8) else { return nil }
         let num = Int(url.lastPathComponent.firstMatch(of: /clase-(\d+)/)?.1 ?? "0") ?? 0
-        var titulo = "Clase \(num)", intro: [String] = [], pasos: [Paso] = []
+        var titulo = L("Clase \(num)"), intro: [String] = [], pasos: [Paso] = []
         var actual: (String, [String])?
         var enCodigo = false
         for l in texto.components(separatedBy: "\n") {

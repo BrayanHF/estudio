@@ -123,7 +123,7 @@ struct VistaMaterias: View {
                     Text("Estudio").font(.system(size: 40 * z, weight: .bold, design: .rounded))
                     Spacer()
                     Button { h.perfil = true } label: {
-                        Label(Perfil.actual?.nombre.nonEmpty ?? "Tu perfil", systemImage: "person.crop.circle").font(.system(size: 14 * z, weight: .semibold))
+                        Label(Perfil.actual?.nombre.nonEmpty ?? L("Tu perfil"), systemImage: "person.crop.circle").font(.system(size: 14 * z, weight: .semibold))
                     }.buttonStyle(.enlace(z)).foregroundStyle(.secondary).help("Tu perfil: quién eres, qué quieres lograr y el idioma de tus clases")
                 }
                 Text("¿Qué vas a estudiar hoy?").font(.system(size: 15 * z)).foregroundStyle(.secondary)
@@ -169,14 +169,14 @@ struct VistaMaterias: View {
     }
 
     private func titulo(_ t: String) -> some View {
-        Text(t).font(.system(size: 11 * z, weight: .semibold)).kerning(1.2).foregroundStyle(.secondary).padding(.top, 8 * z)
+        Text(traducir(t)).font(.system(size: 11 * z, weight: .semibold)).kerning(1.2).foregroundStyle(.secondary).padding(.top, 8 * z)
     }
 
     private func card(_ materia: Materia) -> some View {
         VStack(alignment: .leading, spacing: 10 * z) {
             Image(systemName: materia.icono).font(.system(size: 26 * z)).foregroundStyle(Color.accentColor)
             Text(materia.nombre).font(.system(size: 19 * z, weight: .bold))
-            Text(materia.clases > 0 ? "\(materia.clases) clase\(materia.clases == 1 ? "" : "s")" : materia.tienePlan ? "Plan listo, sin clases todavía" : "Sin plan todavía")
+            Text(materia.clases == 1 ? L("1 clase") : materia.clases > 0 ? L("\(materia.clases) clases") : materia.tienePlan ? L("Plan listo, sin clases todavía") : L("Sin plan todavía"))
                 .font(.system(size: 13 * z)).foregroundStyle(.secondary)
             Text("Teoría \(Int(materia.ajustes.teoria)) % · \(materia.ajustes.duracion) min")
                 .font(.system(size: 12 * z)).foregroundStyle(.tertiary)
@@ -313,7 +313,7 @@ struct VistaMateria: View {
             // la hoja se abre cuando el menú ya se cerró (si no, macOS no la muestra)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: hacer)
         } label: {
-            Label(t, systemImage: icono).font(.system(size: 14 * z, weight: .medium))
+            Label(traducir(t), systemImage: icono).font(.system(size: 14 * z, weight: .medium))
                 .foregroundStyle(rojo ? Color.red : Color.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 12 * z).padding(.vertical, 9 * z).contentShape(Rectangle())
@@ -322,7 +322,7 @@ struct VistaMateria: View {
     }
 
     private func encabezado(_ t: String) -> some View {
-        Text(t).font(.system(size: 11 * z, weight: .semibold)).kerning(1.2).foregroundStyle(.secondary)
+        Text(traducir(t)).font(.system(size: 11 * z, weight: .semibold)).kerning(1.2).foregroundStyle(.secondary)
     }
 
     /// La barra de teoría y práctica: el punto reparte el 100 % entre las dos.
@@ -375,7 +375,7 @@ struct CampoHoja: View {
     let texto: Binding<String>
     let z: CGFloat
     var body: some View {
-        TextField(titulo, text: texto).textFieldStyle(.plain).font(.system(size: 15 * z))
+        TextField(traducir(titulo), text: texto).textFieldStyle(.plain).font(.system(size: 15 * z))
             .padding(.horizontal, 12 * z).padding(.vertical, 9 * z)
             .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 10 * z))
             .overlay(RoundedRectangle(cornerRadius: 10 * z).strokeBorder(Color.white.opacity(0.12)))
@@ -384,7 +384,7 @@ struct CampoHoja: View {
 
 /// Los botones de abajo de las hojas, como los demás de la app (vidrio).
 func botonHoja(_ t: String, _ z: CGFloat) -> some View {
-    Text(t).font(.system(size: 14 * z, weight: .semibold)).padding(.horizontal, 14 * z).padding(.vertical, 6 * z)
+    Text(traducir(t)).font(.system(size: 14 * z, weight: .semibold)).padding(.horizontal, 14 * z).padding(.vertical, 6 * z)
 }
 
 /// Para eliminar una materia hay que escribir su nombre a mano, como en AWS: pegarlo no sirve.
@@ -409,7 +409,7 @@ struct ConfirmarEliminar: View {
                     .padding(.horizontal, 10 * z).padding(.vertical, 5 * z)
                     .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 6 * z))
             }
-            CampoHoja(titulo: "Escribe «\(nombre)»", texto: $f.texto, z: z)
+            CampoHoja(titulo: L("Escribe «\(nombre)»"), texto: $f.texto, z: z)
                 .onChange(of: f.texto) { viejo, nuevo in
                     // al escribir llega una letra a la vez; si llegan varias juntas es que se pegó: no vale
                     if nuevo.count > viejo.count + 1 { f.texto = viejo }

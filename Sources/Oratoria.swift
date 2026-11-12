@@ -1628,6 +1628,7 @@ struct OratoriaApp: App {
                     Button("Mostrar u ocultar el menú de la clase") { s.menuVisible.toggle() }.keyboardShortcut("m", modifiers: [.command, .shift])
                 }
                 CommandMenu("Grabación") { MenuGanancia(g: s.grabador) }
+                CommandGroup(after: .appSettings) { MenuIdioma() }
             }
     }
 }
@@ -1642,5 +1643,44 @@ struct MenuGanancia: View {
             }
         }
         .pickerStyle(.inline)
+    }
+}
+
+
+// MARK: - Idioma de la app
+
+/// En el menú de la app (junto a Ajustes de macOS): español o inglés. Cambia los textos de la app y los menús de macOS
+/// (la app guarda su propio AppleLanguages); se aplica al volver a abrirla. El idioma de las clases va en el perfil.
+struct MenuIdioma: View {
+    private var actual: String {
+        (UserDefaults.standard.array(forKey: "AppleLanguages") as? [String])?.first.map { $0.hasPrefix("en") ? "en" : "es" } ?? "es"
+    }
+
+    var body: some View {
+        Menu("Idioma de la app") {
+            ForEach([("es", "Español"), ("en", "English")], id: \.0) { codigo, nombre in
+                Button { cambiar(a: codigo) } label: {
+                    if codigo == actual { Label(nombre, systemImage: "checkmark") } else { Text(nombre) }
+                }
+            }
+        }
+    }
+
+    private func cambiar(a codigo: String) {
+        guard codigo != actual else { return }
+        UserDefaults.standard.set([codigo], forKey: "AppleLanguages")
+        let a = NSAlert()
+        a.messageText = codigo == "en" ? "Restart Estudio to change the language" : "Reinicia Estudio para cambiar el idioma"
+        a.informativeText = codigo == "en" ? "The menus and texts of the app will be in English." : "Los menús y los textos de la app quedarán en español."
+        a.addButton(withTitle: codigo == "en" ? "Restart now" : "Reiniciar ahora")
+        a.addButton(withTitle: codigo == "en" ? "Later" : "Después")
+        if a.runModal() == .alertFirstButtonReturn {
+            let ruta = Bundle.main.bundlePath
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: "/bin/sh")
+            p.arguments = ["-c", "sleep 1; /usr/bin/open \"\(ruta)\""]
+            try? p.run()
+            NSApp.terminate(nil)
+        }
     }
 }

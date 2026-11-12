@@ -46,10 +46,14 @@ enum Velocidad {
         }.filter { $0.lastPathComponent.prefix(10) >= desde }
         var palabras = 0, segundos = 0.0, n = 0
         for c in carpetas {
+            // los WAV que siguen ahí y los que se borraron al evaluar (su duración quedó en duraciones.tsv)
+            var duracion = Grabador.duraciones(c)
             for wav in (try? fm.contentsOfDirectory(at: c, includingPropertiesForKeys: nil)) ?? [] where wav.pathExtension == "wav" {
-                guard let p = contar(wav.deletingPathExtension().appendingPathExtension("txt")),
-                      let a = try? AVAudioFile(forReading: wav) else { continue }
-                let s = Double(a.length) / a.fileFormat.sampleRate
+                if let a = try? AVAudioFile(forReading: wav) { duracion[wav.lastPathComponent] = Double(a.length) / a.fileFormat.sampleRate }
+            }
+            for (archivo, s) in duracion {
+                let wav = c.appendingPathComponent(archivo)
+                guard let p = contar(wav.deletingPathExtension().appendingPathExtension("txt")) else { continue }
                 // fuera las pruebas de micrófono, la sirena y lo casi vacío
                 guard s >= 5, p >= 10 else { continue }
                 palabras += p; segundos += s; n += 1

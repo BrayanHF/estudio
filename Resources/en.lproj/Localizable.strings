@@ -220,3 +220,4 @@
 "BOCA INFLADA (BBBB)" = "PUFFED CHEEKS (BBBB)";
 "ZUMBIDO (DZZZ)" = "BUZZ (DZZZ)";
 "LENGUA" = "TONGUE";
+"Grabada · %d:%02d · el audio se borró al evaluar la clase" = "Recorded · %d:%02d · the audio was deleted after grading the class";

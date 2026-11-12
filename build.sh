@@ -11,7 +11,7 @@ cp Info.plist "$APP/Contents/"
 cp -R Resources/* "$APP/Contents/Resources/"
 # las herramientas de voz (scripts e instalador) viajan dentro de la app
 mkdir -p "$APP/Contents/Resources/herramientas"
-cp herramientas/* "$APP/Contents/Resources/herramientas/"
+for f in herramientas/*; do [ -f "$f" ] && cp "$f" "$APP/Contents/Resources/herramientas/"; done
 # Firma con un certificado propio y fijo (firma/): así macOS recuerda los permisos
 # de micrófono y grabación de pantalla entre versiones. Si no existe, firma provisional.
 KC=~/Library/Keychains/afinador.keychain-db

@@ -38,11 +38,52 @@ final class Grabador: ObservableObject {
         Carpeta.grabacionesDel(fecha).appendingPathComponent("\(fecha)_\(nombre).wav")
     }
 
-    func existe(_ nombre: String, fecha: String) -> Bool { FileManager.default.fileExists(atPath: url(nombre, fecha: fecha).path) }
+    /// Grabada: el WAV está, o ya se evaluó la clase y se borró (queda en duraciones.tsv).
+    func existe(_ nombre: String, fecha: String) -> Bool { Grabador.hay(url(nombre, fecha: fecha)) }
 
-    func duracion(_ nombre: String, fecha: String) -> Double? {
-        guard let f = try? AVAudioFile(forReading: url(nombre, fecha: fecha)) else { return nil }
-        return Double(f.length) / f.fileFormat.sampleRate
+    /// Se grabó pero el audio ya se borró al evaluar la clase: no se puede escuchar.
+    func borrada(_ nombre: String, fecha: String) -> Bool {
+        let u = url(nombre, fecha: fecha)
+        return !FileManager.default.fileExists(atPath: u.path) && Grabador.duraciones(u.deletingLastPathComponent())[u.lastPathComponent] != nil
+    }
+
+    func duracion(_ nombre: String, fecha: String) -> Double? { Grabador.duracion(url(nombre, fecha: fecha)) }
+
+    static func hay(_ wav: URL) -> Bool {
+        FileManager.default.fileExists(atPath: wav.path) || duraciones(wav.deletingLastPathComponent())[wav.lastPathComponent] != nil
+    }
+
+    static func duracion(_ wav: URL) -> Double? {
+        if let f = try? AVAudioFile(forReading: wav) { return Double(f.length) / f.fileFormat.sampleRate }
+        return duraciones(wav.deletingLastPathComponent())[wav.lastPathComponent]
+    }
+
+    // MARK: las grabaciones solo sirven para calificar la clase
+
+    /// Lo que queda de los audios borrados: "archivo.wav<TAB>segundos" por línea (la velocidad al hablar lo usa).
+    static func duraciones(_ dir: URL) -> [String: Double] {
+        guard let t = try? String(contentsOf: dir.appendingPathComponent("duraciones.tsv"), encoding: .utf8) else { return [:] }
+        var d: [String: Double] = [:]
+        for l in t.split(separator: "\n") {
+            let c = l.split(separator: "\t")
+            if c.count == 2, let s = Double(c[1]) { d[String(c[0])] = s }
+        }
+        return d
+    }
+
+    /// Al terminar la evaluación se borran los WAV de la clase (para siempre, sin Papelera). Quedan las
+    /// transcripciones, el análisis de voz, el resumen y la duración de cada audio.
+    static func borrarAudios(_ dir: URL) {
+        let fm = FileManager.default
+        var d = duraciones(dir)
+        let wavs = ((try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)) ?? []).filter { $0.pathExtension == "wav" }
+        guard !wavs.isEmpty else { return }
+        for w in wavs {
+            if let f = try? AVAudioFile(forReading: w) { d[w.lastPathComponent] = Double(f.length) / f.fileFormat.sampleRate }
+        }
+        let tsv = d.keys.sorted().map { "\($0)\t\(String(format: "%.2f", d[$0]!))" }.joined(separator: "\n") + "\n"
+        guard (try? tsv.write(to: dir.appendingPathComponent("duraciones.tsv"), atomically: true, encoding: .utf8)) != nil else { return }
+        for w in wavs { try? fm.removeItem(at: w) }
     }
 
     func grabar(_ nombre: String, fecha: String) {

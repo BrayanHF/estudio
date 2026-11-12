@@ -385,6 +385,7 @@ final class Sesion: ObservableObject {
                     self.estado.evaluacion = t
                     self.estado.evaluada = true
                     self.guardar()
+                    Grabador.borrarAudios(dir)
                 } else {
                     self.registro.append(L("La evaluación anterior terminó sin dejar grabaciones/\(fecha)/resumen-del-dia.md. Puedes evaluar de nuevo."))
                 }
@@ -421,6 +422,7 @@ final class Sesion: ObservableObject {
                 self.estado.evaluacion = r.respuesta
                 self.estado.evaluada = true
                 self.guardar()
+                Grabador.borrarAudios(dir)   // las grabaciones solo eran para calificar la clase
                 Velocidad.actualizar(siempre: true)
             } else {
                 self.registro.append(L("Algo falló al evaluar: \(r.respuesta)"))
@@ -509,7 +511,7 @@ final class Sesion: ObservableObject {
             let preguntas = p.preguntas
             for (k, r) in p.respuestas.enumerated() {
                 let archivo = "\(fecha)_\(r.nombre).wav"
-                let hay = FileManager.default.fileExists(atPath: dir.appendingPathComponent(archivo).path)
+                let hay = Grabador.hay(dir.appendingPathComponent(archivo))
                 let linea = p.lineas[r.linea].trimmingCharacters(in: .whitespaces)
                 let pregunta = linea.contains("___") ? linea : (k < preguntas.count ? preguntas[k] : "respuesta \(k + 1)")
                 bloque += "- **\(pregunta)** → `\(archivo)`\(hay ? "" : " (no la grabó)")\n"
@@ -524,7 +526,7 @@ final class Sesion: ObservableObject {
         }
         let auto = "\(fecha)_autoevaluacion.wav"
         md += "## Autoevaluación\n"
-        md += FileManager.default.fileExists(atPath: dir.appendingPathComponent(auto).path) ? "Grabada en `\(auto)`.\n" : "(no la grabó)\n"
+        md += Grabador.hay(dir.appendingPathComponent(auto)) ? "Grabada en `\(auto)`.\n" : "(no la grabó)\n"
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         try? md.write(to: dir.appendingPathComponent("respuestas.md"), atomically: true, encoding: .utf8)
     }
@@ -1120,9 +1122,10 @@ struct FilaGrabacion: View {
         let fecha = s.estado.fecha
         let grabandoEste = g.grabando == nombre
         let hay = g.existe(nombre, fecha: fecha)
+        let borrada = g.borrada(nombre, fecha: fecha)
         // reproducir a la izquierda y grabar o regrabar a la derecha (antes al revés)
         HStack(spacing: 12 * z) {
-            if hay && !grabandoEste {
+            if hay && !borrada && !grabandoEste {
                 Button { g.escuchar(nombre, fecha: fecha) } label: {
                     Image(systemName: g.sonando == nombre ? "pause.fill" : "play.fill").font(.system(size: 13 * z)).frame(width: 30 * z, height: 30 * z)
                 }.buttonStyle(.glass).buttonBorderShape(.circle).help("Escuchar")
@@ -1137,6 +1140,9 @@ struct FilaGrabacion: View {
                         Capsule().fill(Color.white.opacity(0.12)).frame(width: 120 * z, height: 5 * z)
                             .overlay(alignment: .leading) { Capsule().fill(g.nivel > 0.9 ? Color.desafinado : Color.afinado).frame(width: 120 * z * CGFloat(min(1, g.nivel)), height: 5 * z) }
                     }.font(.system(size: 12 * z)).foregroundStyle(Color.red)
+                } else if borrada, let d = g.duracion(nombre, fecha: fecha) {
+                    Text(String(format: traducir("Grabada · %d:%02d · el audio se borró al evaluar la clase"), Int(d) / 60, Int(d) % 60))
+                        .font(.system(size: 12 * z)).foregroundStyle(.secondary)
                 } else if hay, let d = g.duracion(nombre, fecha: fecha) {
                     Text(String(format: traducir("Grabada · %d:%02d"), Int(d) / 60, Int(d) % 60)).font(.system(size: 12 * z)).foregroundStyle(Color.afinado)
                     barraDeTiempo(d, fecha: fecha)

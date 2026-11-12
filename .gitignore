@@ -8,3 +8,4 @@ firma/*
 Oratoria.app/
 Estudio.app/
 dist/
+__pycache__/

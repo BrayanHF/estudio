@@ -14,12 +14,13 @@ App de Mac para aprender lo que sea con clases diarias hechas a tu medida, respo
 ## Cómo funciona
 
 - **Perfil:** lo que contaste la primera vez (`~/Library/Application Support/Estudio/perfil.json`). Claude lo recibe en cada pedido. Se cambia desde «Tu perfil».
-- **Materias:** cada carpeta dentro de tu carpeta de materias es una materia, con su `CLAUDE.md` (qué quieres aprender y cómo enseñarte), su plan (`plan/PLAN.md`), sus clases (`plan/clases/`), sus grabaciones y sus registros (`progreso.md`, `aprendido.md`, `cuaderno-de-errores.md`).
+- **Materias:** cada carpeta dentro de tu carpeta de materias es una materia, con su `CLAUDE.md` (qué quieres aprender y cómo enseñarte), su plan (`plan/PLAN.md`), sus clases (`plan/clases/`), las transcripciones de tus respuestas y sus registros (`progreso.md`, `aprendido.md`, `cuaderno-de-errores.md`).
 - **Materia nueva:** escribes qué quieres aprender y para qué, y puedes agregar tu material (PDF o texto). Claude investiga fuentes confiables, las guarda en `estudios/` y arma el plan: temario por clase, metas y la base de cada tema.
 - **Ajustes de cada materia** (`materia.json`): reparto de teoría y práctica, duración de la clase, «cómo se enseña» (tus reglas), nombre, ícono, si lleva calentamiento de voz antes de la clase y `"plantilla": "oratoria"` para una materia de oratoria (ronda diaria, pregunta sorpresa, palabra del día).
 - **Temario:** se edita a mano en la app o pidiéndole el cambio a Claude en palabras.
 - **La clase:** repaso de lo que ya se enseñó (nunca de lo que aún no, ni preguntas repetidas), una lección corta, preguntas de todo tipo (también de opción múltiple, diciendo cuál y por qué), explicar el tema y cerrar con tu autoevaluación. Todo se responde grabando.
 - **La evaluación:** cada respuesta se transcribe y se analiza la voz, y Claude evalúa el contenido (qué acertaste, qué faltó y lo correcto) y cómo hablaste (estructura, claridad, muletillas, variación del tono, velocidad y pausas). Actualiza tu progreso, lo aprendido y el cuaderno de errores, y deja ejercicios para la próxima clase.
+- **Grabaciones:** solo sirven para calificar la clase. Al terminar la evaluación, los audios se borran; quedan las transcripciones, el análisis de voz y el resumen.
 - **Velocidad al hablar:** se calcula con tus grabaciones de los últimos 14 días, de todas las materias.
 - **Afinador:** calentamiento de voz con piano roll y detección de tono en vivo (CREPE en Core ML o YIN), con evaluación nota a nota.
 
